@@ -1,16 +1,20 @@
-# This is a sample Python script.
+import asyncio
+import os
+from dotenv import load_dotenv
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+from mcp_server.client import agents  # Adjust this import path if needed
 
+async def main():
+    load_dotenv()
+    llm_model = os.getenv("OLLAMA_LLM")  # Replace with your actual model name
+    llm_provider = "ollama"  # or "aws"
+    question = "What are the latest advancements in quantum computing?"
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+    try:
+        response = await agents(llm_model, llm_provider, question)
+        print(f"\nFinal Agent Response:\n{response}")
+    except Exception as e:
+        print(f"Error running agent: {e}")
 
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    asyncio.run(main())

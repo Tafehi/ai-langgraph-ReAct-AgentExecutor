@@ -1,5 +1,7 @@
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
+from langchain.chat_models import init_chat_model
 from models.ollama_model import OllamaLLM
 from models.bedrock_model import BedrockLLM
 import traceback
@@ -11,17 +13,13 @@ async def agents(llm_model, llm_provider, question):
             f"Setting up MCP Client with model: {llm_model} and provider: {llm_provider}"
         )
         if llm_provider == "aws":
-            model = BedrockLLM(llm_model).get_llm()
+            model = BedrockLLM().get_llm()
         elif llm_provider == "ollama":
-            model = OllamaLLM(llm_model).get_llm()
-        else:
-            raise ValueError("Unsupported LLM provider. Choose 'aws' or 'ollama'.")
+            model = OllamaLLM().get_llm()
+
     except Exception as e:
         raise RuntimeError(f"Failed to initialize LLM: {e}")
 
-    print(
-        f"LLM Model: {model['llm_model']} from {model['llm_provider']} is initialized successfully."
-    )
 
     mcp_client = MultiServerMCPClient(
         {
@@ -33,6 +31,11 @@ async def agents(llm_model, llm_provider, question):
                 "url": "http://localhost:8002/mcp/",
                 "transport": "streamable_http",
             },
+            # "math": {
+            #     "command": "python",
+            #     "args": ["tools/math_tool.py"],
+            #     "transport": "stdio",
+            # },
         }
     )
 
@@ -64,8 +67,10 @@ async def agents(llm_model, llm_provider, question):
         raise RuntimeError(f"Failed to load tools or prompts: {eg}")
 
     print(f"Loaded Tools: {[tool.name for tool in tools]}")
-    #Binding LLM with tooles
-    agent = create_react_agent(model=model["llm_model"], tools=tools)
+    #Binding LLM with tools
+
+    # using init_chat_model and .bind_tools as a more general solution
+    agent = init_chat_model(model=llm_model, model_provider=llm_provider, temperature=0).bind_tools(tools)
 
     response = await agent.ainvoke(
         {
@@ -80,3 +85,4 @@ async def agents(llm_model, llm_provider, question):
     # print(f"Response: {response}")
     print(f"Agent Response: {response['messages'][-1].content}")
     return response["messages"][-1].content
+

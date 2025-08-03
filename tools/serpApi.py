@@ -63,10 +63,10 @@ class SerpApiSearch:
 # Optional: test the tool directly
 async def main():
     serp = SerpApiSearch()
-    result = await serp.search_serpapi("Who is the current USA president?")
+    result = await serp.search_serpapi("what is the current weather in Oslo. also tell me the date and time that you collect this data?")
     print(result.content)
 
 if __name__ == "__main__":
-    #asyncio.run(main())
+    # asyncio.run(main())
     serp = SerpApiSearch()
     mcp.run(transport="streamable-http")

@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 
 
 class BedrockLLM:
-    def __init__(self, model):
+    def __init__(self ):
         load_dotenv()
-        self._model = model
+        self._model = os.getenv("AWS_LLM")
         self._access_key = os.getenv("AWS_ACCESS_KEY_ID")
         self._secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
         self._session_token = os.getenv("AWS_SESSION_TOKEN")
